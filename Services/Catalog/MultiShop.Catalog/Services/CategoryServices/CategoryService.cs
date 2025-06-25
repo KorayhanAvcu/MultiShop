@@ -2,13 +2,37 @@
 using MongoDB.Driver;
 using MultiShop.Catalog.Dtos.CategoryDtos;
 using MultiShop.Catalog.Entities;
+using MultiShop.Catalog.Settings;
 
 namespace MultiShop.Catalog.Services.CategoryServices
 {
     public class CategoryService : ICategoryService
     {
-        private readonly IMongoCollection<Category> _categoryCollection;
-        private readonly IMapper _mapper;
+        // CategoryService sınıfında MongoDB'deki "Category" koleksiyonuna erişim sağlamak için kullanılan alanlar tanımlanıyor.
+        private readonly IMongoCollection<Category> _categoryCollection; // MongoDB'deki Category koleksiyonunu temsil eder.
+        private readonly IMapper _mapper; // Nesne dönüşümleri için AutoMapper arayüzüdür.
+
+        // Constructor (yapıcı metot), CategoryService sınıfı örneği oluşturulurken çalışır.
+        // Bağımlılık olarak IMapper ve IDatabaseSettings alır.
+        public CategoryService(IMapper mapper, IDatabaseSettings _databaseSettings)
+        {
+            // MongoClient sınıfı ile MongoDB bağlantısı oluşturulur.
+            // _databaseSettings.ConnectionString değeri, veritabanına bağlanmak için gereken bağlantı dizesidir.
+            var client = new MongoClient(_databaseSettings.ConnectionString);
+
+            // Belirtilen veritabanı adına göre MongoDB'deki veritabanına erişilir.
+            var database = client.GetDatabase(_databaseSettings.DatabaseName);
+
+            // Veritabanındaki belirli bir koleksiyon (örneğin "Categories") alınır ve _categoryCollection alanına atanır.
+            // Böylece bu koleksiyon üzerinden sorgular yapılabilir (ekle, sil, güncelle vb.).
+            _categoryCollection = database.GetCollection<Category>(_databaseSettings.CategoryCollectionName);
+
+            // IMapper örneği sınıf içindeki _mapper alanına atanır.
+            // Bu, DTO ile model arasında dönüşüm işlemleri yapmak için kullanılır.
+            _mapper = mapper;
+        }
+
+
         public Task CreateCategoryAsync(CreateCategoryDto createCategoryDto)
         {
             throw new NotImplementedException();
