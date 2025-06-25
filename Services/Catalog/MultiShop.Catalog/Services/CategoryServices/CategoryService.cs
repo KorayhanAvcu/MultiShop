@@ -33,21 +33,27 @@ namespace MultiShop.Catalog.Services.CategoryServices
         }
 
 
-        public Task CreateCategoryAsync(CreateCategoryDto createCategoryDto)
+        public async Task CreateCategoryAsync(CreateCategoryDto createCategoryDto)
         {
-            throw new NotImplementedException();
+            var value = _mapper.Map<Category>(createCategoryDto);
+            await _categoryCollection.InsertOneAsync(value);
         }
 
-        public Task DeleteCategoryAsync(string id)
+        public async Task DeleteCategoryAsync(string id)
         {
-            throw new NotImplementedException();
+            await _categoryCollection.DeleteOneAsync(x=> x.CategoryID == id);
         }
 
-        public Task<List<ResultCategoryDto>> GetAllCategoriesAsync()
+        // Tüm kategorileri veritabanından asenkron olarak getirip, ResultCategoryDto listesine dönüştüren metot.
+        public async Task<List<ResultCategoryDto>> GetAllCategoriesAsync()
         {
-            throw new NotImplementedException();
-        }
+            // MongoDB'deki _categoryCollection koleksiyonunda tüm verileri (şart olmadan) getirir.
+            // x => true ifadesi, tüm belgelerin seçilmesini sağlar (filtre yok).
+            var values = await _categoryCollection.Find(x => true).ToListAsync();
 
+            // AutoMapper kullanılarak, Category türündeki veriler ResultCategoryDto türüne dönüştürülür.
+            return _mapper.Map<List<ResultCategoryDto>>(values);
+        }
         public Task<GetByIdCategoryDto> GetByIdCategoryDtoAsync(string id)
         {
             throw new NotImplementedException();
