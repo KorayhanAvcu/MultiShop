@@ -54,14 +54,25 @@ namespace MultiShop.Catalog.Services.CategoryServices
             // AutoMapper kullanılarak, Category türündeki veriler ResultCategoryDto türüne dönüştürülür.
             return _mapper.Map<List<ResultCategoryDto>>(values);
         }
-        public Task<GetByIdCategoryDto> GetByIdCategoryDtoAsync(string id)
+
+        // Belirtilen 'id' değerine göre kategori verisini veritabanından asenkron olarak getirir.
+        public async Task<GetByIdCategoryDto> GetByIdCategoryDtoAsync(string id)
         {
-            throw new NotImplementedException();
+            // _categoryCollection koleksiyonunda, CategoryID'si 'id' ile eşleşen ilk kaydı bul ve getir.
+            var values = await _categoryCollection.Find<Category>(x => x.CategoryID == id).FirstOrDefaultAsync();
+
+            // Veritabanından gelen Category nesnesini GetByIdCategoryDto tipine dönüştür (map et) ve sonucu döndür.
+            return _mapper.Map<GetByIdCategoryDto>(values);
         }
 
-        public Task UpdateCategoryAsync(UpdateCategoryDto updateCategoryDto)
+        // Güncellenmiş kategori bilgilerini alır ve veritabanındaki ilgili kaydı asenkron olarak günceller.
+        public async Task UpdateCategoryAsync(UpdateCategoryDto updateCategoryDto)
         {
-            throw new NotImplementedException();
+            // Güncelleme için gelen DTO'yu Category tipine dönüştür.
+            var values = _mapper.Map<Category>(updateCategoryDto);
+
+            // Veritabanındaki CategoryID'si güncellenen DTO'nun CategoryID'si ile eşleşen kaydı bul ve yeni değerlerle değiştir.
+            await _categoryCollection.FindOneAndReplaceAsync(x => x.CategoryID == updateCategoryDto.CategoryID, values);
         }
     }
 }
